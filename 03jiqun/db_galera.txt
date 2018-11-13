@@ -1,0 +1,149 @@
+不要怂，直接干！！
+
+实验拓扑
+         
+
+步骤一：添加MariaDB官方社区安装源（所有节点）
+# echo "[MariaDB]
+name=MariaDB
+baseurl=http://yum.mariadb.org/10.0.21/centos7-amd64/
+gpgcheck=1
+gpgkey=http://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+enabled=1" > /etc/yum.repos.d/mariadb.repo
+
+步骤二：关闭selinux（所有节点）
+# setenforce 0
+
+步骤三：安装Galera Cluster以及MariaDB软件包（所有数据库节点）
+# yum install -y MariaDB-Galera-server MariaDB-client rsync galera
+
+步骤四：启动服务（所有数据库节点）
+# service mysql start
+
+步骤五：初始化数据库安全配置（所有数据库节点）
+# mysql_secure_installation
+
+步骤六：在数据库中创建集群用户并授权（所有数据库节点）
+# mysql -uroot -p
+mysql> create user 'cluster-user' identified by '123456';
+mysql> grant all privileges on *.* to 'cluster-user'@'%'
+   -> identified by '123456' with grant option;
+
+步骤七：停止数据库服务（所有数据库节点）
+# service mysql stop
+
+步骤八：调整数据库配置（所有数据库节点）
+DB-1:
+# cat >> /etc/my.cnf.d/server.cnf << EOF
+>query_cache_size=0
+>binlog_format=ROW
+>default_storage_engine=innodb
+>innodb_autoinc_lock_mode=2
+>wsrep_provider=/usr/lib64/galera/libgalera_smm.so
+>wsrep_cluster_address="gcomm://10.0.0.114,10.0.0.120,10.0.0.130"
+>wsrep_cluster_name='My_DB_Cluster'
+>wsrep_node_address='10.0.0.114'
+>wsrep_sst_method=rsync
+>wsrep_sst_auth=cluster-user:123456
+>EOF
+
+DB-2:
+# cat >> /etc/my.cnf.d/server.cnf << EOF
+>query_cache_size=0
+>binlog_format=ROW
+>default_storage_engine=innodb
+>innodb_autoinc_lock_mode=2
+>wsrep_provider=/usr/lib64/galera/libgalera_smm.so
+>wsrep_cluster_address="gcomm://10.0.0.114,10.0.0.120,10.0.0.130"
+>wsrep_cluster_name='My_DB_Cluster'
+>wsrep_node_address='10.0.0.120'
+>wsrep_sst_method=rsync
+>wsrep_sst_auth=cluster-user:123456
+>EOF
+
+DB-3:
+# cat >> /etc/my.cnf.d/server.cnf << EOF
+>query_cache_size=0
+>binlog_format=ROW
+>default_storage_engine=innodb
+>innodb_autoinc_lock_mode=2
+>wsrep_provider=/usr/lib64/galera/libgalera_smm.so
+>wsrep_cluster_address="gcomm://10.0.0.114,10.0.0.120,10.0.0.130"
+>wsrep_cluster_name='My_DB_Cluster'
+>wsrep_node_address='10.0.0.130'
+>wsrep_sst_method=rsync
+>wsrep_sst_auth=cluster-user:123456
+>EOF
+
+步骤九：启动Galera集群（任一数据库节点）
+# /etc/init.d/mysql bootstrap
+
+步骤十：启动Galera集群中的其他节点（其余数据库节点）
+# /etc/init.d/mysql start
+
+步骤十一：验证集群状态（所有数据库节点）
+# mysql -uroot -p -e "show status like 'wsrep%'"
+
+步骤十二：数据同步测试（所有数据库节点）
+DB-1:
+# mysql -uroot -p -e "create database test"
+# mysql -uroot -p -e "create table test.test1 (number int, name varchar(50))"
+DB-2:
+# mysql -uroot -p -e "show databases"
+# mysql -uroot -p -e "show tables from test"
+DB-3:
+# mysql -uroot -p -e "show databases"
+# mysql -uroot -p -e "show tables from test"
+
+步骤十三：安装并启动Galera Arbitrator（负载均衡节点）
+# yum install -y galera
+# garbd -a gcomm://10.0.0.114:4567 -g My_DB_Cluster -l /tmp/garbd.out -d
+
+步骤十四：安装Haproxy（负载均衡节点）
+# yum install -y haproxy
+
+步骤十五：配置Haproxy（负载均衡节点）
+# cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
+# cat > /etc/haproxy/haporxy.cfg << EOF
+>global
+>    log         127.0.0.1 local2
+>    chroot      /var/lib/haproxy
+>    pidfile     /var/run/haproxy.pid
+>    maxconn     4000
+>    user        haproxy
+>    group       haproxy
+>    daemon
+>    stats socket /var/lib/haproxy/stats
+>defaults
+>    mode                    tcp
+>    log                     global
+>    option                  dontlognull
+>    option                  redispatch
+>    retries                 3
+>    timeout http-request    10s
+>    timeout queue           45s
+>    timeout connect         5s
+>    timeout client          1m
+>    timeout server          1m
+>    timeout check           10s
+>    maxconn                 3000
+>frontend  main *:3306
+>    bind 10.0.0.118:3306
+>    default_backend             app
+>backend app
+>    balance     roundrobin
+>    server  app1 10.0.0.114:3306 maxconn 151 check
+>    server  app2 10.0.0.120:3306 maxconn 151 check
+>    server  app3 10.0.0.130:3306 maxconn 151 check
+EOF
+
+步骤十六：启动Haproxy（负载均衡节点）
+# systemctl enable haproxy
+# systemctl start haproxy
+
+步骤十七：验证负载均衡器（负载均衡节点）
+# netstat -natp | grep 3306
+
+步骤十八：更多测试与验证（客户端节点）
+还等什么！！自己玩吧！！！
+
