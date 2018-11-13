@@ -1,0 +1,80 @@
+环境说明：
+在同一台主机上实现LAMP（Linux + Apache + MariaDB + PHP）
+CentOS 7.3、Apache 2.4.6、MariaDB 5.5.52、PHP 5.4.16
+1 安装LAMP
+采用yum方式进行安装httpd、MariaDB、php、php-mysql，php-mysql用来进行php和MariaDB数据库的连接。
+[root@CentOS7 ~]# yum install  httpd  mariadb-server  php php-mysql -y
+2 创建新的虚拟主机
+（1）新增虚拟主机配置文件
+[root@CentOS7 ~]# vim /etc/httpd/conf.d/vhost.conf
+<VirtualHost *:80>
+DocumentRoot "/var/www/wordpress"
+ServerName      www.mywordpress.com
+       <Directory "/var/www/wordpress">
+       AllowOverride None
+       Require all granted
+       </Directory>
+<VirtualHost>
+（2）创建所需目录
+[root@CentOS7 ~]# mkdir /var/www/wordpress
+3 在虚拟主机主目录/var/www/wordpress下新建index.php文件
+[root@CentOS7 ~]# vim /var/www/wordpress/index.php
+
+<?php
+       phpinfo();
+?>
+4 检查语法并启动httpd服务
+（1）检查语法
+[root@CentOS7 ~]# httpd -t
+Syntax OK
+（2）启动httpd服务
+[root@CentOS7 ~]# systemctl start httpd.service
+5 测试
+在浏览器中输入www.mywordpress.com
+
+可以看到PHP默认页面已经成功显示，说明测试成功
+6 下载wordpress压缩包，wordpress-4.7.4-zh_CN.tar.gz
+（1）解压缩
+[root@CentOS7 ~]# tar -xf wordpress-4.7.4-zh_CN.tar.gz
+（2）把解压缩后得到的文件（wordpress）复制到DocumentRoot（/var/www/wordpress/）下
+[root@CentOS7 ~]# cp -a wordpress /var/www/wordpress/
+7 启动MariaDB服务
+[root@CentOS7 ~]# systemctl start  mariadb
+8 通过浏览器访问wordpress
+在浏览器中输入http://www.mywordpress.com/wordpress
+注意：配置DNS服务器解析www.test.com 为192.168.29.100
+或者 修改windows 下的C:\Windows\Systeme32\drivers\etc\hosts文件
+192.168.29.100  www.test.com
+
+可以看到已经出了wordpress 页面，可以点击“现在就开始”就行配置，也可以手动修改配置文件
+9 修改wordpress配置文件
+（1）进入WordPress目录（/var/www/wordpress/wordpress/）
+[root@CentOS7 ~]# cd /var/www/wordpress/wordpress/
+（2）复制cp wp-config-sample.php模板文件为 wp-config.php，然后编辑
+[root@CentOS7 ~]# vim /var/www/wordpress/wordpress/wp-config.php
+// ** MySQL 设置 - 具体信息来自您正在使用的主机 ** //
+/** WordPress数据库的名称 */
+define('DB_NAME', 'wordpress');
+/** MySQL数据库用户名 */
+define('DB_USER', 'test1');
+/** MySQL数据库密码 */
+define('DB_PASSWORD', '123456');
+/** MySQL主机 */
+define('DB_HOST', 'localhost');
+10 在数据库中创建数据库和用户
+（1）创建数据库
+MariaDB [(none)]> create database wordpress;
+Query OK, 1 row affected (0.00 sec)
+（2）创建用户
+MariaDB [(none)]> create user 'test1'@'localhost' identified by '123456';
+Query OK, 0 rows affected (0.00 sec)
+（3）给用户授权
+MariaDB [(none)]> grant all on wordpress.* to 'test1'@'localhost';
+Query OK, 0 rows affected (0.01 sec)
+11 再次访问WordPress
+http://www.mywordpress.com/wordpress
+
+填入相关信息，就可以正常访问博客了。
+
+
+

@@ -1,0 +1,6 @@
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Install MariaDB server
+      yum:
+        name: mariadb-server

@@ -1,0 +1,6 @@
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Install PHP client for MySQL
+      yum:
+        name: php-mysql

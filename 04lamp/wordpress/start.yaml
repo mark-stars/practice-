@@ -1,0 +1,12 @@
+---
+- import_playbook: tasks/selinux_disable.yaml
+- import_playbook: tasks/apache.yaml
+- import_playbook: tasks/db.yaml
+- import_playbook: tasks/php.yaml
+- import_playbook: tasks/php_mysql.yaml
+- import_playbook: tasks/http_service.yaml
+- import_playbook: tasks/db_service.yaml
+- import_playbook: tasks/db_setup.yaml
+- import_playbook: tasks/php_cfg.yaml
+- import_playbook: tasks/web_site.yaml
+- import_playbook: tasks/web_cfg.yaml

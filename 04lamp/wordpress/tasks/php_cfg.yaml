@@ -1,0 +1,7 @@
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Modify PHP config file
+      copy:
+        src: ../codes/php.ini
+        dest: /etc/php.ini

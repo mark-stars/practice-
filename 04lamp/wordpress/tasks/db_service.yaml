@@ -1,0 +1,7 @@
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Start MariaDB service
+      systemd:
+        name: mariadb
+        state: started

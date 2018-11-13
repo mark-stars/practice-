@@ -1,0 +1,7 @@
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Start HTTP service
+      systemd:
+        name: httpd
+        state: started

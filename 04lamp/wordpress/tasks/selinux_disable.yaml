@@ -1,0 +1,8 @@
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Set SELinux to disabled
+      raw: setenforce 0
+    - selinux:
+        state: disabled
+

@@ -1,0 +1,5 @@
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Copy web site codes to server directory
+      raw: cp -ra ~/qyy-playbooks/wordpress/codes/wordpress/* /var/www/html/

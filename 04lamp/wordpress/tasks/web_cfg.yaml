@@ -1,0 +1,7 @@
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Copy web site config file
+      copy:
+        src: ../codes/wp-config.php
+        dest: /var/www/html/

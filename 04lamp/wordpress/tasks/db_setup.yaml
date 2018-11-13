@@ -1,0 +1,5 @@
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Initial MySQL setup
+      script: ./db_setup.sh
