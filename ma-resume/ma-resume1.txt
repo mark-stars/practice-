@@ -39,8 +39,8 @@ zabbix-server一台，agent30台），因为要实时监控各节点，所以age
 环境：centos7.5的服务器
 
 根据需求选用最流行的监控软件zabbix，学习软件的使用方法和搭建方法
-安装相关软件包（zabbix-server-mysql，zabbix-web-server，）和MySQL数据库，创建zabbix专属库，启用服务。在web浏览器进行监控，然后根据不同的
-服务器需求，具体制订模版进行监控，有效的解决问题。
+负责安装相关软件包（zabbix-server-mysql，zabbix-web-server，）和MySQL数据库，创建zabbix专属库，启用服务。在web浏览器进行监控，然后根据不同的
+需求，具体制订模版进行监控，进行定期巡检。
 
   
 
