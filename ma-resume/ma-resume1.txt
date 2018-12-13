@@ -50,9 +50,9 @@ zabbix-server一台，agent30台），因为要实时监控各节点，所以age
 
 
 专业技能
-1.熟悉Linux系统，IP地址的规划。了解搭建Linux系统服务，如web,dns,ntp，nginx
-2.了解shell环境，能使用shell脚本，并能和grep，AWK等工具配合使用。
-3.了解lamp。了解ceph，nfs的搭建使用维护
-4.熟悉MySQL并能对库进行增删查改。
+1.熟悉虚拟化技术,openstack云平台的搭建维护.
+2.熟悉Linux系统，IP地址的规划。了解搭建Linux系统服务，如web,dns,ntp，nginx
+3.了解shell环境，能使用shell脚本，并能和grep，AWK等工具配合使用。
+4.了解lamp。了解ceph，nfs的搭建使用维护.熟悉MySQL并能对库进行增删查改。
 5.熟悉监控zabbix的搭建及使用。
 6.熟悉自动化部署工具的使用。
